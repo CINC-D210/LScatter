@@ -1,0 +1,21 @@
+function [, prmLTEDLSCH, prmMdl_Tag] = commlteSISO_initialize_Tag(chanBW, contReg, modType, Eqmode,...
+                                 cRate,maxIter, fullDecode, chanMdl, corrLvl, chEstOn, maxNumErrs, maxNumBits)
+%建立结构体变量： PDSCH资源块生成相关  DLSCH解码相关   Mdl信道相关
+
+
+
+% Channel parameters
+prmMdl_Tag.chanMdl = chanMdl;
+prmMdl_Tag.corrLevel = corrLvl;
+prmMdl_Tag.chEstOn = chEstOn;
+switch modType
+    case 1
+        snrdBs=[0:4:8, 9:12];
+    case 2
+        snrdBs=[0:4:12, 13:16];
+    otherwise
+        snrdBs=0:4:24;
+end
+prmMdl_Tag.snrdBs=snrdBs;
+prmMdl_Tag.maxNumBits=maxNumBits;
+prmMdl_Tag.maxNumErrs=maxNumErrs;
