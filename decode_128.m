@@ -88,7 +88,7 @@ end
 sum(loc);
 ratio
 
-%IFFT到时域解调   （矩阵乘法）
+%IFFT到时域解调   （矩阵乘法） aaaaa
 bit_seq_matrix2=[];
 for cnt=3:2+12
 bit_seq2=tagdecode128_ifft(p_est, yRec_tag128(:,cnt), txGrid(:,cnt));
