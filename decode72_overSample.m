@@ -39,6 +39,7 @@ X_valid=X_tag(idx);  %%%TAG调制后，USRP收到的频域72值（为了逼近�
 
 %得到 Fourier矩阵：
 
+
 DFT_matrix = dftmtx(N*nOvers);     % DFT矩阵 
 DFT_matrix2=DFT_matrix*diag(x)*f_repeatMtx(N*nOvers,nOvers);  %*diag(x)*重复矩阵
 
@@ -54,8 +55,8 @@ DFT_matrix2=DFT_matrix*diag(x)*f_repeatMtx(N*nOvers,nOvers);  %*diag(x)*重复�
 % 
 % X_valid; %TAG调制后的72
 
-
-DFT_matrix_idx=DFT_matrix2(idx,:);  %有效频率上的那些矩阵（取出了一DFT矩阵的一些行）  （选择行）  
+idx_2=[2:37,N*nOvers-35:N*nOvers];
+DFT_matrix_idx=DFT_matrix2(idx_2,:);  %有效频率上的那些矩阵（取出了一DFT矩阵的一些行）  （选择行） 
 DTT_matrix_idx_const=DFT_matrix_idx(:,[1:p_est-1,p_est+len:N]);  %  有效矩阵中*的是1的那些值   （选择列）
 
 x_const=ones(128-72,1);
