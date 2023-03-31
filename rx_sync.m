@@ -59,8 +59,10 @@ Global_Parameters;
 enb = rmc3;
 h128s = zeros(128,4,80);
 err=[];
+err_72=[];
+err_72_over=[];
 %% OFFSET
-for offset = 53:53  %%80个5ms  11-90
+for offset = 11:90  %%80个5ms  11-90
     rxWaveform = tagWave(19200*offset:19200*offset+19200*2);
     rxWaveformCorrected = waveformCorrect(rxWaveform,enb);
     %% 接收机解调TAG
@@ -102,7 +104,7 @@ for offset = 53:53  %%80个5ms  11-90
         yRec_tag = Equalizer(rxGrid_72, H_est, nVar, 1);  %zero-forcing %%m???????
 %          preamble_p = zeros(72,1);
         % 4.4 估计整数倍偏移p，及128子载波信道
-        [p_est,H128_est]=findp_128(yRec_tag(:,4),preamble_p,txGrid(:,4),rxGrid_128(:,4)); 
+        [p_est,H128_est,idx]=findp_128(yRec_tag(:,4),preamble_p,txGrid(:,4),rxGrid_128(:,4)); 
 
           ps(index+1,offset)=p_est;
         % 4.5 信道均衡（128）  （前两列可以不计算）
@@ -139,7 +141,27 @@ for offset = 53:53  %%80个5ms  11-90
             [number4,ratio4,loc4] = symerr(bit_seq4,Bit01(:,cnt-4));
             tag_e_rates4(cnt-4,index+1)=ratio4;
         end
+
+        nRepeat=72/code_len;
+       for cnt=5:14
+            bit_seq5=decode72(p_est, yRec_tag(:,cnt), txGrid(:,cnt),idx,nRepeat);
+            Bit_down=downsample(Bit01(:,cnt-4),nRepeat);
+            [number5,ratio5,loc5] = symerr(bit_seq5,Bit_down);
+            tag_e_rates5(cnt-4,index+1)=ratio5;
+       end
+
+        nOvers=10;
+       for cnt=5:14
+            bit_seq6=decode72_overSample(p_est, yRec_tag(:,cnt), txGrid(:,cnt),idx,nRepeat,nOvers);
+            Bit_down=downsample(Bit01(:,cnt-4),nRepeat);
+            [number6,ratio6,loc6] = symerr(bit_seq6,Bit_down);
+            tag_e_rates6(cnt-4,index+1)=ratio6;
+        end
     end
       err=[err mean(tag_e_rates2(:))];
+      err_72=[err_72 mean(tag_e_rates5(:))];
+      err_72_over=[err_72_over mean(tag_e_rates6(:))];
 end
 mean(err)
+mean(err_72)
+mean(err_72_over)

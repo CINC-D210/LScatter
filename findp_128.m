@@ -1,4 +1,4 @@
-function  [p_est,H128_est]= findp_128(X_change,preamble_p,X,X_tag_rec)
+function  [p_est,H128_est,idx]= findp_128(X_change,preamble_p,X,X_tag_rec)
 %输入：修正后的频域值 前导码  实际的频域值
 
 % %% 测试数据
@@ -17,7 +17,7 @@ tmp(N/2-len/2+1:N/2, :, :) = X(1:len/2, :, :);  % N=2048  ;len=1200       % 425-
 tmp(N/2+2:N/2+1+len/2, :, :) = X(len/2+1:len, :, :);    %1025为直流 填0    %  1026-1625        
 tmp = [tmp(N/2+1:N, :, :); tmp(1:N/2, :, :)];   %前一半和后一半交换  ？？？
 X_in=tmp;  %X_in为LTE原本的  时频栅格映射到IFFT前的128个点
-% idx=ExpungeFrom(1:N,find(X_in==0));
+idx=ExpungeFrom(1:N,find(X_in==0));
 
 tmp = complex(zeros(N,1));
 tmp(N/2-len/2+1:N/2, :, :) = X_change(1:len/2, :, :);  % N=2048  ;len=1200       % 425-1024

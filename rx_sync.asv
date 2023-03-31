@@ -59,6 +59,7 @@ Global_Parameters;
 enb = rmc3;
 h128s = zeros(128,4,80);
 err=[];
+err_72=[];
 %% OFFSET
 for offset = 53:53  %%80个5ms  11-90
     rxWaveform = tagWave(19200*offset:19200*offset+19200*2);
@@ -102,7 +103,7 @@ for offset = 53:53  %%80个5ms  11-90
         yRec_tag = Equalizer(rxGrid_72, H_est, nVar, 1);  %zero-forcing %%m???????
 %          preamble_p = zeros(72,1);
         % 4.4 估计整数倍偏移p，及128子载波信道
-        [p_est,H128_est]=findp_128(yRec_tag(:,4),preamble_p,txGrid(:,4),rxGrid_128(:,4)); 
+        [p_est,H128_est,idx]=findp_128(yRec_tag(:,4),preamble_p,txGrid(:,4),rxGrid_128(:,4)); 
 
           ps(index+1,offset)=p_est;
         % 4.5 信道均衡（128）  （前两列可以不计算）
@@ -125,21 +126,38 @@ for offset = 53:53  %%80个5ms  11-90
             [number2,ratio2,loc2] = symerr(bit_seq2,Bit01(:,cnt-4));
             tag_e_rates2(cnt-4,index+1)=ratio2;
         end
-%         %IFFT 72subcarrier
-%         bit_seq_matrix3=[];
-%         for cnt=5:14
-%             bit_seq3=mydecode72(p_est, yRec_tag(:,cnt), txGrid(:,cnt),code_len);
-%             [number3,ratio3,loc3] = symerr(bit_seq3,Bit01(:,cnt-4));
-%             tag_e_rates3(cnt-4,index+1)=ratio3;
-%         end
-%         %FFT 1xsampple 72subcarrier
-%         bit_seq_matrix4=[];
-%         for cnt=5:14
-%             bit_seq4=mydecodefft1(p_est, yRec_tag(:,cnt), txGrid(:,cnt),code_len);
-%             [number4,ratio4,loc4] = symerr(bit_seq4,Bit01(:,cnt-4));
-%             tag_e_rates4(cnt-4,index+1)=ratio4;
-%         end
+        %IFFT 72subcarrier
+        bit_seq_matrix3=[];
+        for cnt=5:14
+            bit_seq3=mydecode72(p_est, yRec_tag(:,cnt), txGrid(:,cnt),code_len);
+            [number3,ratio3,loc3] = symerr(bit_seq3,Bit01(:,cnt-4));
+            tag_e_rates3(cnt-4,index+1)=ratio3;
+        end
+        %FFT 1xsampple 72subcarrier
+        bit_seq_matrix4=[];
+        for cnt=5:14
+            bit_seq4=mydecodefft1(p_est, yRec_tag(:,cnt), txGrid(:,cnt),code_len);
+            [number4,ratio4,loc4] = symerr(bit_seq4,Bit01(:,cnt-4));
+            tag_e_rates4(cnt-4,index+1)=ratio4;
+        end
+
+       for cnt=5:14
+            bit_seq5=decode72(p_est, yRec_tag(:,cnt), txGrid(:,cnt),idx,code_len);
+            Bit_down=downsample(Bit01(:,cnt-4),code_len);
+            [number5,ratio5,loc5] = symerr(bit_seq5,Bit_down);
+            tag_e_rates5(cnt-4,index+1)=ratio5;
+       end
+
+        nOvers=10;
+       for cnt=5:14
+            bit_seq6=decode72_overSample(p_est, yRec_tag(:,cnt), txGrid(:,cnt),idx,code_len,nOvers);
+            Bit_down=downsample(Bit01(:,cnt-4),code_len);
+            [number6,ratio6,loc6] = symerr(bit_seq6,Bit_down);
+            tag_e_rates6(cnt-4,index+1)=ratio6;
+        end
     end
-      err=[err mean(tag_e_rates(:))];
+      err=[err mean(tag_e_rates2(:))];
+      err_72=[err_72 mean(tag_e_rates5(:))];
+      err_72_over=[err_72_over mean(tag_e_rates6(:))];
 end
 mean(err)
