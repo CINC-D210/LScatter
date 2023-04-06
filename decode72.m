@@ -37,6 +37,7 @@ DFT_matrix = dftmtx(N);  %FFT_matrix=fft(eye(2048));     % DFT矩阵  秩2048
 DFT_matrix_idx=DFT_matrix(idx,:);  %有效频率上的那些矩阵（取出了一DFT矩阵的一些行）  （选择行）  秩1200
 DTT_matrix_idx_const=DFT_matrix_idx(:,[1:p_est-1,p_est+len:N]);  %  有效矩阵中*的是1的那些值   （选择列）秩532
 
+
 W=DTT_matrix_idx_const*x_const;  
 Y=X_valid-W;  %Y=F_idx x  的Y（减去常量的1200个频域值）
 
@@ -45,7 +46,7 @@ F_idx=DFT_matrix_idx(:, p_est:p_est+len-1);   %DFT矩阵中 选出子载波行�
 %% 方程组Ax=b的系数
 A=F_idx;  %rank(A)=739
 b=Y;
-x0; %为原x值
+% x0; %为原x值
 % rank(A)
 
 % code=BIT(:,1);   %BIT 的第一列是第三个OFDM符号上调至的TAG信息
@@ -62,62 +63,6 @@ C=-2*B;%复矩阵秩 737     实部秩：1074  虚部秩：1073
 d=b-B*ones(len,1);
 
 % testC=C*code_01-d;
-
-
-%伪逆
-% tic
-aaa=pinv(real(C))*real(d);
-aaa_decode=ones(len,1);
-aaa_decode(find(aaa<0.5))=0; %从虚部解的方程
-% toc
-
-% %验证：
-% code_01=code;
-% code_01(find(code==1))=0;
-% code_01(find(code==-1))=1;
-% C*code_01;
-% code_01*code_01';
-%% 
-% clc
-
-%从实部解的方程
-bit_real=ones(len,1);
-x_real = lsqminnorm(real(C), real(d),1e-9,'warn');
-bit_real(find(x_real<0.5))=0;  
-
-%从虚部解的方程
-x_imag = lsqminnorm(imag(C), imag(d),1e-9,'warn');
-bit_imag=ones(len,1);           
-bit_imag(find(x_real<0.5))=0; 
-
-%从复数解的方程
-x_complex = lsqminnorm((C), (d),1e-7,'warn');
-bit_complex=ones(len,1);           
-bit_complex(find(x_complex<0.5))=0; 
-
-% % %反斜杠解方程
-% % bit_fanxiegang=C \ d;
-% % bit_fxg=ones(len,1);           
-% % bit_fxg(find(abs(bit_fanxiegang)<0.99))=0; %从虚部解的方程
-
-
-
-% % 误码率及误码位置
-% bit_errors_real=length(find (bit_real~=code_01));
-% bit_errors_imag=length(find (bit_imag~=code_01));
-% bit_errors_complex=length(find (bit_complex~=code_01));
-% % % bit_errors_fxg=length(find (bit_fxg~=code_01))
-% 
-% err_idx_real=find (bit_real~=code_01);
-% err_idx_imag=find (bit_imag~=code_01);
-% err_idx_complex=find (bit_complex~=code_01);
-% % % err_idx_fxg=find (bit_fxg~=code_01);
-% 
-% 
-% % 解的误差
-% error_true=norm((C*code_01-d),2);    %真实解的误差
-% error_solution=norm((C*bit_complex-d),2);  %所求解的误差
-
 
 
 %% 考虑重复的情况：
